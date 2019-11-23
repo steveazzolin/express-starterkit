@@ -29,8 +29,9 @@ async function loader(app) {
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json());
   // Load API routes
-  app.use(config.api.prefix, routes());
+  app.use(config.api.prefix, routes());  //ascolta in /api ed invoca routes()
 
+  //Se l'URL non è stato matchato tra quelli definiti in routes allora genera errore
   /// catch 404 and forward to error handler
   app.use((req, res, next) => {
     const err = new Error('Not Found');
@@ -47,7 +48,7 @@ async function loader(app) {
       return res
         .status(err.status)
         .send({ message: err.message })
-        .end();
+        .end(); 
     }
     return next(err);
   });

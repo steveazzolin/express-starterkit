@@ -8,6 +8,6 @@ const loaders = require('./loaders');
 
 module.exports = async function() {
   const app = express();
-  await loaders(app);
+  await loaders(app); //inizializzo gli hearth-beat e middleware per gestione errori
   return app;
 };
