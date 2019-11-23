@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const Logger = require('../loaders/logger');
 
 const UserService = require('@app/services/users');
 
@@ -10,6 +11,11 @@ module.exports = async function(routes) {
   route.get('/', async (req, res) => {
     const filters = req.query;
     const users = await UserService.find(filters);
-    res.status(200).json(users);
+    //throw new Error("UnauthorizedError");
+    Logger.info("routes/users.js");
+    res.status(200).json(users);    
+    //il .json/send/end non terminano l'esecuzione
   });
+
+  
 };
