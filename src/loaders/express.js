@@ -36,13 +36,13 @@ async function loader(app) {
     req.start_time = new Date();
     next();
   }
-  function postFilter(req,res){
+  function postFilter(err,req,res,next){
     Logger.info(`Request ended in ${new Date() - req.start_time}ms`);
+    if(err)
+      next(err);
     res.json(res.response); //In questa API faccio sempre .json() per inviare i dati. Se non fosse così potrei inserire in res metadati per differenziare .send()/.json()
     //il .json/send/end non terminano l'esecuzione
   }
-
-
   // Load API routes
   app.use(config.api.prefix, preFilter, routes(), postFilter);  //ascolta in /api/ ed invoca routes()
 
