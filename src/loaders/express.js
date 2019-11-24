@@ -30,16 +30,22 @@ async function loader(app) {
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json());
 
-  //Intercetta tutte le richieste per le API per controlli/funzioni comuni a tutte le API (traduzione ids,controllo headers/IP,settaggio tempo inizio richiesta,contabilizzazione uso API...)
+  //Interc-etta tutte le richieste per le API per controlli/funzioni comuni a tutte le API (traduzione ids,controllo headers/IP,settaggio tempo inizio richiesta,contabilizzazione uso API...)
   function preFilter(req, res,next) {
-    Logger.info("preFilter");
+    Logger.info("preFilter" + res.statusCode);
+    res.statusCode = -1;
     req.start_time = new Date();
     next();
   }
-  function postFilter(err,req,res,next){
+  function postFilter(req, res, next) {
     Logger.info(`Request ended in ${new Date() - req.start_time}ms`);
-    if(err)
-      next(err);
+    Logger.info(res.statusCode);
+    
+    /*if(err)  //se si è verificato un errore allora invoco il middleware per gli errori
+      next(err);*/
+
+    if (res.statusCode < 0) //nessun errore si è verificato ma nessun servizio è stato invocato (404)
+      next();
     res.json(res.response); //In questa API faccio sempre .json() per inviare i dati. Se non fosse così potrei inserire in res metadati per differenziare .send()/.json()
     //il .json/send/end non terminano l'esecuzione
   }

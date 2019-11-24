@@ -13,7 +13,7 @@ async function create(user) {
 }
 
 async function find(filters) {
-  throw new Error("AiaError");
+  //throw new Error("AiaError");
   return User.find(filters);
 }
 
