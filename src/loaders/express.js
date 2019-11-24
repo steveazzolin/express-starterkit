@@ -1,5 +1,6 @@
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const Logger = require('../loaders/logger');
 
 const routes = require('@app/routes');
 const config = require('@app/config');
@@ -28,8 +29,22 @@ async function loader(app) {
 
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json());
+
+  //Intercetta tutte le richieste per le API per controlli/funzioni comuni a tutte le API (traduzione ids,controllo headers/IP,settaggio tempo inizio richiesta,contabilizzazione uso API...)
+  function preFilter(req, res,next) {
+    Logger.info("preFilter");
+    req.start_time = new Date();
+    next();
+  }
+  function postFilter(req,res){
+    Logger.info(`Request ended in ${new Date() - req.start_time}ms`);
+    res.json(res.response); //In questa API faccio sempre .json() per inviare i dati. Se non fosse così potrei inserire in res metadati per differenziare .send()/.json()
+    //il .json/send/end non terminano l'esecuzione
+  }
+
+
   // Load API routes
-  app.use(config.api.prefix, routes());  //ascolta in /api ed invoca routes()
+  app.use(config.api.prefix, preFilter, routes(), postFilter);  //ascolta in /api/ ed invoca routes()
 
   //Se l'URL non è stato matchato tra quelli definiti in routes allora genera errore
   /// catch 404 and forward to error handler

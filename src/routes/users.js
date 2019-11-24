@@ -8,14 +8,16 @@ const route = Router();
 module.exports = async function(routes) {
   routes.use('/users', route);
 
-  route.get('/', async (req, res) => {
+  route.get('/', async (req, res,next) => {
     const filters = req.query;
-    const users = await UserService.find(filters);
-    //throw new Error("UnauthorizedError");
-    Logger.info("routes/users.js");
-    res.status(200).json(users);    
-    //il .json/send/end non terminano l'esecuzione
-  });
-
-  
+    //const users = await UserService.find(filters);
+    users={name:"Steve",age:21};
+    
+    //throw  Error("UnauthorizedError");
+    Logger.info("i am routes/users.js");
+    //res.status(200).json(users);    Originariamente invio direttamente il risultato da qua
+    res.status(200);
+    res.response = users; //mentre qua attacco a res l'oggetto che deve inviare. Il post-filter farà l'invio
+    next();
+  }); 
 };
