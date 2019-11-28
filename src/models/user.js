@@ -1,12 +1,16 @@
-let users = [];
+const Logger = require('../loaders/logger');
+var db_connection = require("./connection");
 
 async function create(user) {
-  users.push(user);
+  //users.push(user);
 }
 
-// eslint-disable-next-line no-unused-vars
+
 async function find(filters) {
-  return users;
+  const db = db_connection.getDB();
+  ret = await db.collection("users").find().toArray();
+  console.log(JSON.stringify(ret));
+  return ret;
 }
 
 module.exports = {

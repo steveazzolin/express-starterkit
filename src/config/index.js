@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 
 // Set the NODE_ENV to 'development' by default
@@ -11,6 +12,8 @@ if (result.error) {
   // This error should crash whole process
   throw result.error;
 }
+
+password_db = fs.readFileSync(process.env.FILE, 'utf8');
 
 module.exports = {
   port: process.env.PORT || 3000,
@@ -27,5 +30,7 @@ module.exports = {
    */
   logs: {
     level: process.env.LOG_LEVEL || 'silly'
-  }
+  },
+  url_db: process.env.URL_DB,
+  db_password: password_db
 };

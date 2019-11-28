@@ -10,8 +10,7 @@ module.exports = async function(routes) {
 
   route.get('/', async (req, res,next) => {
     const filters = req.query;
-    //const users = await UserService.find(filters).catch((err) => { next(err); } );
-    users={name:"Steve",age:21};
+    const users = await UserService.find(filters).catch((err) => { next(err); } );
 
     //throw  Error("UnauthorizedError");
     Logger.info("i am routes/users.js");
