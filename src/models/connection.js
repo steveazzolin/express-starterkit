@@ -1,7 +1,7 @@
 //Create the connection Pool for the DB
 var assert = require('assert');
-const config = require('../config');
-const Logger = require('../loaders/logger');
+const config = require('@app/config');
+const Logger = require('@app/loaders/logger');
 var { MongoClient } = require("mongodb");
 
 var mongodb = null;

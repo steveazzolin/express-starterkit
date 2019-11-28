@@ -30,59 +30,37 @@ async function loader(app) {
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json());
 
-  //Interc-etta tutte le richieste per le API per controlli/funzioni comuni a tutte le API (traduzione ids,controllo headers/IP,settaggio tempo inizio richiesta,contabilizzazione uso API...)
-  function preFilter(req, res,next) {
-    Logger.info("preFilter" + res.statusCode);
-    res.statusCode = -1;
+  //Intercetta tutte le richieste per le API per controlli/funzioni comuni a tutte le API
+  function preFilter(req, res, next) {
+    Logger.info("preFilter");
+    res.statusCode = -1; //Se il postFilter riceve lo status a -1 allora la richiesta non è stata servita da nessuna API (404)
     req.start_time = new Date();
     next();
   }
+
+  app.use(config.api.prefix, preFilter, routes());  //ascolta in /api/ ed invoca routes()
+
+  /// error handler
+  app.use((err, req, res, next) => {
+    res.status(err.status || 500)
+    res.response = { errors: { message: err.message } };
+    Logger.info("Error:" + err.message);  //Stampo sempre qua gli errori così da non dover stampare a console ogni volta che c'è il throw di un errore
+    next();//vado a postFilter
+  });
+
+
   function postFilter(req, res, next) {
     Logger.info(`Request ended in ${new Date() - req.start_time}ms`);
-    Logger.info(res.statusCode);
-    
-    /*if(err)  //se si è verificato un errore allora invoco il middleware per gli errori
-      next(err);*/
 
-    if (res.statusCode < 0) //nessun errore si è verificato ma nessun servizio è stato invocato (404)
-      next();
-    res.json(res.response); //In questa API faccio sempre .json() per inviare i dati. Se non fosse così potrei inserire in res metadati per differenziare .send()/.json()
-    //il .json/send/end non terminano l'esecuzione
-  }
-  // Load API routes
-  app.use(config.api.prefix, preFilter, routes(), postFilter);  //ascolta in /api/ ed invoca routes()
-
-  //Se l'URL non è stato matchato tra quelli definiti in routes allora genera errore
-  /// catch 404 and forward to error handler
-  app.use((req, res, next) => {
-    const err = new Error('Not Found');
-    err['status'] = 404;
-    next(err);
-  });
-
-  /// error handlers
-  app.use((err, req, res, next) => {
-    /**
-     * Handle 401 thrown by express-jwt library or 401 in general.
-     */
-    if (err.name === 'UnauthorizedError' || err.status === 401) {
-      return res
-        .status(err.status)
-        .send({ message: err.message })
-        .end(); 
+    if (res.statusCode < 0) { //nessun errore si è verificato ma nessun servizio è stato invocato (404)
+      res.status(404);
+      res.response = { errors: { message: "Not Found" } };
     }
-    return next(err);
-  });
-  // eslint-disable-next-line no-unused-vars
-  app.use((err, req, res, next) => {
-    Logger.info("Internal error: " + err.message);
-    res.status(err.status || 500);
-    res.json({
-      errors: {
-        message: err.message
-      }
-    });
-  });
+    res.json(res.response).end(); //In questa API faccio sempre .json() per inviare i dati. Se non fosse così potrei inserire in res metadati per differenziare .send()/.json()
+  }
+
+
+  app.use(postFilter);
 }
 
 module.exports = loader;
